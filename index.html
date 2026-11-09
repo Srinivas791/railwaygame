@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RailYatra – Indian Railway Ticket Booking Simulator</title>
+  <meta name="description" content="Realistic and interactive Indian Railways Ticket Booking Simulator Game with a modern IRCTC-inspired interface.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Top Tricolor & IRCTC Header -->
+  <header class="irctc-top-header">
+    <div class="tricolor-stripe"></div>
+    <div class="top-bar-inner">
+      <div class="top-left-status">
+        <span class="irctc-digital-clock" id="irctc-live-clock">--:--:-- IST</span>
+        <span class="sim-alert-pill">⚠️ SIMULATED GAME DATA • NOT LIVE IRCTC</span>
+      </div>
+      <div class="top-right-profile">
+        <div class="railcoins-badge" title="RailCoins Balance (Game Points)">
+          🪙 <span id="header-coins-val">₹5,000</span>
+        </div>
+        <div class="level-badge" id="header-level-badge">Lvl 1: Apprentice Traveler</div>
+        <span style="font-size:0.85rem; color:#64748b;" id="header-xp-val">350 XP</span>
+        <button class="audio-toggle-btn" id="audio-toggle-btn">🔊 Sound On</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Navigation Bar -->
+  <nav class="irctc-main-nav">
+    <div class="nav-container">
+      <div class="brand-section" onclick="navigateTo('home-view')">
+        <div class="brand-logo-symbol">🚆</div>
+        <div class="brand-texts">
+          <h1>RailYatra</h1>
+          <div class="brand-tagline">Indian Railway Ticket Booking Simulator</div>
+        </div>
+      </div>
+
+      <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle navigation">☰</button>
+
+      <ul class="nav-links-list" id="primary-nav-links">
+        <li><a href="#" class="nav-link active" data-navigate="home-view" data-view="home-view">🏠 Home</a></li>
+        <li><a href="#" class="nav-link" data-navigate="trains-view" data-view="trains-view">🔍 Train Search</a></li>
+        <li><a href="#" class="nav-link" data-navigate="mybookings-view" data-view="mybookings-view">📋 My Bookings</a></li>
+        <li><a href="#" class="nav-link" data-navigate="pnr-view" data-view="pnr-view">🎫 PNR Status</a></li>
+        <li><a href="#" class="nav-link" data-navigate="game-view" data-view="game-view">🎮 Game Zone</a></li>
+        <li><a href="#" class="nav-link" data-navigate="about-view" data-view="about-view">ℹ️ IRCTC Guide</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Live Railway Announcement Ticker -->
+  <div class="ticker-banner">
+    <div class="ticker-tag">ANNOUNCEMENT</div>
+    <div class="ticker-content">
+      Welcome to RailYatra Simulator! Search trains between 15+ major junctions including Vijayawada (BZA), Hyderabad (HYB/SC), Chennai (MAS), Bengaluru (SBC), New Delhi (NDLS), Howrah (HWH), and Mumbai (MMCT). Test your skills in the Tatkal Rush Challenge! All bookings are for gaming and educational purposes.
+    </div>
+  </div>
+
+  <!-- Main App Content Area -->
+  <main class="main-wrapper">
+
+    <!-- 1. HOME VIEW -->
+    <section id="home-view" class="app-view active">
+      <div class="hero-booking-section">
+        <!-- Hero Visual Banner -->
+        <div class="hero-banner-visual">
+          <div class="hero-headline">
+            <h2>Experience the Heartbeat of Indian Railways</h2>
+            <p>From Vande Bharat high-speed sprints to legendary Express routes, book your simulated journey, explore coach berth maps, and conquer Tatkal challenges.</p>
+          </div>
+
+          <!-- Animated Train Silhouette -->
+          <div class="animated-train-track">
+            <div class="train-loco-sprite">🚆🚃🚃🚃</div>
+          </div>
+
+          <div class="hero-stats-row">
+            <div class="stat-pill">
+              <strong>15+</strong>
+              <span>Major Junctions</span>
+            </div>
+            <div class="stat-pill">
+              <strong>18+</strong>
+              <span>Iconic Trains</span>
+            </div>
+            <div class="stat-pill">
+              <strong>100%</strong>
+              <span>Interactive Simulator</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- IRCTC Inspired Search Form Card -->
+        <div class="search-card-container">
+          <div class="search-card-title">
+            <span>🎫 Book Train Ticket</span>
+          </div>
+
+          <form id="train-search-form" class="search-form-grid" onsubmit="event.preventDefault();">
+            <!-- From & To Stations with Autocomplete & Swap -->
+            <div class="station-input-row">
+              <div class="station-autocomplete-wrapper">
+                <label class="form-label" for="search-from">From Station *</label>
+                <input type="text" id="search-from" class="input-field" placeholder="Station name or code..." autocomplete="off">
+                <div class="autocomplete-dropdown" id="from-suggestions"></div>
+              </div>
+
+              <button type="button" class="swap-btn" id="swap-stations-btn" title="Swap Stations">⇄</button>
+
+              <div class="station-autocomplete-wrapper">
+                <label class="form-label" for="search-to">To Station *</label>
+                <input type="text" id="search-to" class="input-field" placeholder="Station name or code..." autocomplete="off">
+                <div class="autocomplete-dropdown" id="to-suggestions"></div>
+              </div>
+            </div>
+
+            <!-- Journey Date with quick pills -->
+            <div class="date-row-block">
+              <label class="form-label" for="search-date">Journey Date *</label>
+              <input type="date" id="search-date" class="input-field">
+              <div class="quick-date-pills">
+                <button type="button" class="date-pill" data-offset="0">Today</button>
+                <button type="button" class="date-pill active" data-offset="1">Tomorrow</button>
+                <button type="button" class="date-pill" data-offset="2">Day After</button>
+                <button type="button" class="date-pill" data-offset="5">Weekend</button>
+              </div>
+            </div>
+
+            <!-- Passengers, Class, Quota -->
+            <div class="dropdowns-row">
+              <div class="form-group">
+                <label class="form-label" for="search-passengers">Passengers</label>
+                <select id="search-passengers" class="input-field">
+                  <option value="1">1 Adult</option>
+                  <option value="2">2 Adults</option>
+                  <option value="3">3 Adults</option>
+                  <option value="4">4 Adults</option>
+                  <option value="5">5 Adults</option>
+                  <option value="6">6 Adults</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="search-class">Travel Class</label>
+                <select id="search-class" class="input-field">
+                  <option value="ALL">All Classes</option>
+                  <option value="1A">AC First Class (1A)</option>
+                  <option value="2A">AC 2 Tier (2A)</option>
+                  <option value="3A">AC 3 Tier (3A)</option>
+                  <option value="SL">Sleeper (SL)</option>
+                  <option value="CC">AC Chair Car (CC)</option>
+                  <option value="EC">Exec. Chair Car (EC)</option>
+                  <option value="2S">Second Sitting (2S)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="search-quota">Quota</label>
+                <select id="search-quota" class="input-field">
+                  <option value="GN">General (GN)</option>
+                  <option value="TQ">Tatkal (TQ)</option>
+                  <option value="PT">Premium Tatkal (PT)</option>
+                  <option value="LD">Ladies (LD)</option>
+                  <option value="SS">Senior Citizen (SS)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn-search-trains" id="search-trains-submit-btn">
+              <span>🔍 Search Trains</span>
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Quick Route Suggestions -->
+      <div class="quick-routes-section">
+        <h3 class="section-sub-title">Popular Indian Railway Routes</h3>
+        <div class="routes-chips-wrap">
+          <button class="quick-route-chip" data-from="BZA" data-to="SC">⚡ Vijayawada ➔ Hyderabad</button>
+          <button class="quick-route-chip" data-from="SC" data-to="BZA">⚡ Hyderabad ➔ Vijayawada</button>
+          <button class="quick-route-chip" data-from="SBC" data-to="MAS">🚆 Bengaluru ➔ Chennai</button>
+          <button class="quick-route-chip" data-from="BZA" data-to="NDLS">🚩 Vijayawada ➔ New Delhi</button>
+          <button class="quick-route-chip" data-from="BZA" data-to="HWH">🌊 Vijayawada ➔ Howrah</button>
+          <button class="quick-route-chip" data-from="MMCT" data-to="PUNE">⛰️ Mumbai ➔ Pune</button>
+          <button class="quick-route-chip" data-from="SC" data-to="TPTY">🙏 Secunderabad ➔ Tirupati</button>
+          <button class="quick-route-chip" data-from="VSKP" data-to="SC">🚅 Visakhapatnam ➔ Secunderabad</button>
+        </div>
+      </div>
+
+      <!-- Feature Grid -->
+      <div class="home-features-grid">
+        <div class="feature-box">
+          <div class="feature-icon">💺</div>
+          <h4>Visual Coach Map</h4>
+          <p>Pick your favorite Lower, Middle, Upper, or Side Lower berths in realistic Sleeper and AC coach layouts.</p>
+        </div>
+        <div class="feature-box">
+          <div class="feature-icon">⚡</div>
+          <h4>Tatkal Rush Mini-Game</h4>
+          <p>Experience the 10:00 AM high-stakes Tatkal rush with live seat depletion and Captcha verification!</p>
+        </div>
+        <div class="feature-box">
+          <div class="feature-icon">📄</div>
+          <h4>Realistic IRCTC E-Ticket</h4>
+          <p>Generate authentic Electronic Reservation Slips with QR codes, barcode, and one-click PDF printing.</p>
+        </div>
+        <div class="feature-box">
+          <div class="feature-icon">🪙</div>
+          <h4>RailCoins & Quests</h4>
+          <p>Earn points for every journey, complete traveler scenarios, unlock badges, and rise from Apprentice to Grandmaster.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. TRAIN SEARCH RESULTS VIEW -->
+    <section id="trains-view" class="app-view">
+      <div class="results-header-banner">
+        <div>
+          <div class="route-title" id="results-route-title">Vijayawada (BZA) ➔ Secunderabad (SC)</div>
+          <div class="route-subtitle" id="results-route-subtitle">Tomorrow • General Quota • 5 Trains Available</div>
+        </div>
+        <div class="results-action-btns">
+          <span class="level-badge" id="results-count-badge">5 Trains</span>
+          <button class="btn btn-secondary" onclick="navigateTo('home-view')">Modify Search</button>
+        </div>
+      </div>
+
+      <div class="trains-list-container" id="train-results-container">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+    </section>
+
+    <!-- 3. INTERACTIVE COACH & SEAT VIEW -->
+    <section id="coach-view" class="app-view">
+      <div class="coach-view-container">
+        <div class="coach-header-card">
+          <div id="coach-header-info">
+            <h3>12727 - Godavari Express</h3>
+            <div class="coach-sub">Coach B3 • AC 3-Tier</div>
+          </div>
+          <button class="btn btn-secondary" onclick="navigateTo('trains-view')">Back to Trains</button>
+        </div>
+
+        <div class="coach-legend">
+          <div class="legend-item"><span class="legend-color avail"></span> Available</div>
+          <div class="legend-item"><span class="legend-color sel"></span> Selected</div>
+          <div class="legend-item"><span class="legend-color booked"></span> Booked / Occupied</div>
+          <div class="legend-item"><strong>LB:</strong> Lower Berth</div>
+          <div class="legend-item"><strong>MB:</strong> Middle Berth</div>
+          <div class="legend-item"><strong>UB:</strong> Upper Berth</div>
+          <div class="legend-item"><strong>SL:</strong> Side Lower</div>
+          <div class="legend-item"><strong>SU:</strong> Side Upper</div>
+        </div>
+
+        <!-- Carriage Interactive Container -->
+        <div id="coach-interactive-container">
+          <!-- Coach Layout rendered dynamically -->
+        </div>
+
+        <div class="coach-footer-strip">
+          <div>
+            <strong>Selected Berths:</strong>
+            <span id="coach-selected-list" style="margin-left: 8px;"></span>
+          </div>
+          <button class="btn btn-primary" onclick="confirmCoachBerthsAndProceed()">Confirm Berths & Enter Passenger Details ➔</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. PASSENGER DETAILS VIEW -->
+    <section id="passenger-view" class="app-view">
+      <div class="passenger-layout">
+        <div class="passenger-forms-wrapper">
+          <div class="passenger-summary-banner" id="passenger-header-summary">
+            <!-- Train summary badge rendered dynamically -->
+          </div>
+
+          <div id="passenger-cards-container">
+            <!-- Passenger cards dynamically generated -->
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <button type="button" class="btn btn-secondary" onclick="addAnotherPassenger()">+ Add Another Passenger (Max 6)</button>
+            <button type="button" class="btn btn-secondary" onclick="openInteractiveCoach(AppState.selectedTrain.number, AppState.selectedClass)">💺 Change / Pick Berths</button>
+          </div>
+
+          <!-- Contact Details Card -->
+          <div class="contact-card">
+            <h4>Contact Details for Simulated E-Ticket</h4>
+            <div class="contact-grid">
+              <div class="form-group">
+                <label class="form-label" for="contact-mobile">Mobile Number (SMS alerts)</label>
+                <input type="tel" id="contact-mobile" class="input-field" value="9848022338">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="contact-email">Email ID (PDF e-Ticket copy)</label>
+                <input type="email" id="contact-email" class="input-field" value="traveler@railyatra.in">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sticky Fare Card -->
+        <div class="sticky-fare-summary-card">
+          <div class="fare-card-title">Fare Summary</div>
+          <div class="fare-breakdown-box" id="fare-breakdown-box">
+            <!-- Dynamically populated -->
+          </div>
+
+          <button class="btn btn-primary btn-proceed-pay" onclick="proceedToPayment()">
+            Proceed to Payment ➔
+          </button>
+          <div style="font-size:0.75rem; color:#94a3b8; text-align:center; margin-top:10px;">
+            🔒 256-Bit SSL Simulated Indian Railway Gateway
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. PAYMENT VIEW (RAILPAY SIMULATOR) -->
+    <section id="payment-view" class="app-view">
+      <div class="payment-modal-box">
+        <div class="railpay-header">
+          <div class="railpay-title">
+            <span>🛡️ RailPay</span>
+            <span style="font-size: 0.8rem; font-weight: normal; opacity: 0.85;">Indian Railways Gateway</span>
+          </div>
+          <div class="pay-amount-box">
+            <span>Total Payable:</span>
+            <strong id="payment-amount-display">₹1,180</strong>
+          </div>
+        </div>
+
+        <div class="payment-modes-layout">
+          <!-- Sidebar tabs -->
+          <div class="payment-tabs-sidebar">
+            <button class="pay-tab-btn active" onclick="switchPayTab('tab-upi', this)">📱 UPI & QR Code</button>
+            <button class="pay-tab-btn" onclick="switchPayTab('tab-card', this)">💳 Credit / Debit Card</button>
+            <button class="pay-tab-btn" onclick="switchPayTab('tab-netbanking', this)">🏛️ Net Banking</button>
+            <button class="pay-tab-btn" onclick="switchPayTab('tab-coins', this)">🪙 RailCoins Wallet</button>
+          </div>
+
+          <!-- Tab Contents -->
+          <div class="payment-content-area">
+            <!-- UPI Tab -->
+            <div id="tab-upi" class="pay-tab-panel active">
+              <div class="upi-qr-center-box">
+                <h4>Scan UPI QR with any App</h4>
+                <div class="qr-canvas-border">
+                  <canvas id="upi-qr-canvas" width="180" height="180"></canvas>
+                </div>
+                <div id="upi-countdown-timer" style="font-size:0.85rem; font-weight:700; color:#dc2626;">
+                  QR expires in 3:00
+                </div>
+                <div class="upi-apps-row">
+                  <span class="upi-app-icon">Google Pay</span>
+                  <span class="upi-app-icon">PhonePe</span>
+                  <span class="upi-app-icon">Paytm</span>
+                  <span class="upi-app-icon">BHIM</span>
+                </div>
+                <button class="btn btn-success" style="width: 100%; margin-top: 14px;" onclick="completePayment('UPI')">
+                  Simulate QR Payment Done ➔
+                </button>
+              </div>
+            </div>
+
+            <!-- Card Tab -->
+            <div id="tab-card" class="pay-tab-panel">
+              <h4>Card Details (RuPay, Visa, Mastercard)</h4>
+              <div class="card-sim-form">
+                <div class="form-group">
+                  <label class="form-label">Card Number</label>
+                  <input type="text" class="input-field" value="4532 •••• •••• 8912" readonly>
+                </div>
+                <div class="card-split-row">
+                  <div class="form-group">
+                    <label class="form-label">Expiry (MM/YY)</label>
+                    <input type="text" class="input-field" value="08/29">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">CVV</label>
+                    <input type="password" class="input-field" value="842" maxlength="3">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Name on Card</label>
+                  <input type="text" class="input-field" value="SRINIVAS RAO">
+                </div>
+                <button class="btn btn-primary" onclick="completePayment('Card')">Pay Now with Card ➔</button>
+              </div>
+            </div>
+
+            <!-- Net Banking Tab -->
+            <div id="tab-netbanking" class="pay-tab-panel">
+              <h4>Select Your Bank</h4>
+              <div style="display:flex; flex-direction:column; gap:10px; margin-top:14px;">
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                  <input type="radio" name="nb-bank" checked> 🏛️ State Bank of India (SBI)
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                  <input type="radio" name="nb-bank"> 🏛️ HDFC Bank
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                  <input type="radio" name="nb-bank"> 🏛️ ICICI Bank
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                  <input type="radio" name="nb-bank"> 🏛️ Axis Bank
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                  <input type="radio" name="nb-bank"> 🏛️ Punjab National Bank (PNB)
+                </label>
+              </div>
+              <button class="btn btn-primary" style="margin-top:20px; width:100%;" onclick="completePayment('NetBanking')">
+                Log In & Authorize Payment ➔
+              </button>
+            </div>
+
+            <!-- RailCoins Wallet Tab -->
+            <div id="tab-coins" class="pay-tab-panel">
+              <h4>Pay with Game RailCoins</h4>
+              <p style="margin: 10px 0; color:#475569;">
+                Available Wallet Balance: <strong id="payment-wallet-bal" style="color:#0f3868;">₹5,000</strong>
+              </p>
+              <p style="font-size:0.85rem; color:#64748b;">
+                You earn RailCoins by completing journeys, finishing Tatkal rush challenges, and fulfilling passenger scenarios!
+              </p>
+              <button class="btn btn-success" style="margin-top:20px; width:100%;" onclick="completePayment('RailCoins')">
+                Redeem RailCoins & Confirm Ticket ➔
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. E-TICKET VIEW (ERS) -->
+    <section id="ticket-view" class="app-view">
+      <div class="ticket-page-container">
+        <div class="ticket-actions-bar">
+          <button class="btn btn-secondary" onclick="navigateTo('home-view')">🏠 Book Another Journey</button>
+          <div style="display:flex; gap:10px;">
+            <button class="btn btn-secondary" onclick="downloadTicketJSON()">📥 Download Ticket (JSON)</button>
+            <button class="btn btn-primary" onclick="printTicket()">🖨️ Print / Save as PDF</button>
+          </div>
+        </div>
+
+        <!-- Printable IRCTC Ticket Slip -->
+        <div id="printable-ticket-content">
+          <!-- Filled dynamically by app.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. MY BOOKINGS VIEW -->
+    <section id="mybookings-view" class="app-view">
+      <div class="my-bookings-container">
+        <div class="results-header-banner">
+          <div>
+            <h3>My Booked Journeys</h3>
+            <div class="route-subtitle">Manage reservations, print e-tickets, and simulate cancellations</div>
+          </div>
+          <button class="btn btn-primary" onclick="navigateTo('home-view')">+ Book New Journey</button>
+        </div>
+
+        <div class="my-bookings-list" id="my-bookings-list">
+          <!-- Loaded from LocalStorage -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. PNR STATUS CHECKER VIEW -->
+    <section id="pnr-view" class="app-view">
+      <div class="pnr-checker-container">
+        <div class="pnr-search-bar-card">
+          <h3>Enquire Indian Railways PNR Status</h3>
+          <p style="color:#64748b; font-size:0.9rem; margin-top:4px;">Enter your 10-digit Passenger Name Record (PNR) number to check live charting, coach allocation, and berth status.</p>
+          <div class="pnr-input-wrap">
+            <input type="text" id="pnr-query-input" class="input-field" placeholder="Enter 10-digit PNR (e.g. 482-1984210)" maxlength="12">
+            <button class="btn btn-primary" id="pnr-query-submit-btn">Check Status ➔</button>
+          </div>
+        </div>
+
+        <div id="pnr-query-results">
+          <!-- PNR Details displayed here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. GAME ZONE (TATKAL RUSH & QUESTS) -->
+    <section id="game-view" class="app-view">
+      <div class="game-zone-container">
+        <div class="game-zone-header">
+          <h2>RailYatra Game Hub 🎮</h2>
+          <p>Compete in the adrenaline-packed Tatkal Rush, embark on passenger quest scenarios, and collect Indian Railway achievements!</p>
+        </div>
+
+        <!-- Tatkal Rush Simulator -->
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3>⚡ Tatkal Booking Rush Simulator</h3>
+            <button class="btn btn-danger" id="btn-start-tatkal-challenge">Start 10:00 AM Tatkal Challenge</button>
+          </div>
+          <div id="tatkal-game-arena">
+            <div class="tatkal-arena-card">
+              <p>Tatkal quota opens precisely at 10:00 AM for AC classes and 11:00 AM for Non-AC classes. In real life, thousands of passengers compete simultaneously for limited berths. Click "Start 10:00 AM Tatkal Challenge" above to experience the rush!</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Passenger Scenarios -->
+        <div>
+          <h3>🗺️ Passenger Scenario Quests</h3>
+          <p style="color:#64748b; font-size:0.9rem; margin-bottom:14px;">Select a real-world railway challenge and book the required itinerary to earn bonus XP and RailCoins!</p>
+          <div class="scenarios-grid" id="scenarios-list-container">
+            <!-- Rendered by app.js -->
+          </div>
+        </div>
+
+        <!-- Achievements Grid -->
+        <div>
+          <h3>🏆 Railway Badges & Achievements</h3>
+          <div class="achievements-grid" id="achievements-grid">
+            <!-- Rendered by gameEngine.js -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10. ABOUT VIEW / IRCTC GUIDE -->
+    <section id="about-view" class="app-view">
+      <div class="coach-view-container">
+        <h2 style="color:var(--irctc-blue); margin-bottom:12px;">Indian Railways & IRCTC Ticketing Guide</h2>
+        <div style="display:flex; flex-direction:column; gap:20px; font-size:0.92rem; color:#334155;">
+          <div>
+            <h4>Travel Classes Explained:</h4>
+            <ul style="padding-left:20px; margin-top:6px;">
+              <li><strong>1A (AC First Class):</strong> Luxury 2-berth coupes and 4-berth cabins with lockable doors, plush bedding, and tailored meals.</li>
+              <li><strong>2A (AC 2-Tier):</strong> Air-conditioned coach with 2-level berths (Upper & Lower) and curtain privacy.</li>
+              <li><strong>3A (AC 3-Tier):</strong> Most popular AC travel tier with 3-level berths (Lower, Middle, Upper) and side berths.</li>
+              <li><strong>SL (Sleeper Class):</strong> Classic non-AC open-window coach with 3-tier berths, economical for long-distance journeys.</li>
+              <li><strong>CC (AC Chair Car):</strong> Comfortable 3x2 cushioned seating for daytime intercity trains (Shatabdi, Vande Bharat, Intercity).</li>
+              <li><strong>EC (Executive Chair Car):</strong> Ultra-spacious 2x2 rotating seats with premium onboard catering.</li>
+              <li><strong>2S (Second Sitting):</strong> Budget reserved non-AC seat for short hops.</li>
+            </ul>
+          </div>
+
+          <div>
+            <h4>Quotas Decoded:</h4>
+            <ul style="padding-left:20px; margin-top:6px;">
+              <li><strong>GN (General Quota):</strong> Standard booking open 120 days in advance.</li>
+              <li><strong>TQ (Tatkal Quota):</strong> Emergency quota open 1 day in advance at 10:00 AM (AC) and 11:00 AM (Non-AC).</li>
+              <li><strong>PT (Premium Tatkal Quota):</strong> Dynamic pricing quota based on instant demand.</li>
+              <li><strong>LD (Ladies Quota):</strong> Reserved berths for solo female travelers and mothers traveling with children.</li>
+              <li><strong>SS (Senior Citizen Quota):</strong> Lower berth preference reserved for senior citizens.</li>
+            </ul>
+          </div>
+
+          <div>
+            <h4>Disclaimer:</h4>
+            <p style="background:#fff3cd; padding:12px; border-radius:6px; border:1px solid #ffeeba; color:#856404;">
+              <strong>RailYatra is an educational simulation game.</strong> All train schedules, availability statuses, fares, PNR numbers, and payment gateways are completely simulated. No real money is charged, and no real Indian Railways reservations are generated.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Route Details Modal -->
+  <div class="modal-overlay" id="route-modal">
+    <div class="modal-dialog" style="max-width: 650px;">
+      <h3 id="route-modal-title" style="color:var(--irctc-blue); margin-bottom:12px;">Train Route & Schedule</h3>
+      <div id="route-modal-body" style="max-height: 380px; overflow-y: auto;">
+        <!-- Schedule Table -->
+      </div>
+      <button class="btn btn-secondary" style="margin-top:16px;" onclick="closeRouteModal()">Close Schedule</button>
+    </div>
+  </div>
+
+  <!-- OTP Verification Modal -->
+  <div class="modal-overlay" id="otp-modal">
+    <div class="modal-dialog">
+      <div style="font-size:2rem; margin-bottom:8px;">📱</div>
+      <h3>Bank 3D-Secure Verification</h3>
+      <p id="otp-sent-hint" style="color:#64748b; font-size:0.85rem; margin-top:6px;"></p>
+      <div class="otp-box">
+        <input type="text" id="sim-otp-input" maxlength="6" placeholder="••••••">
+      </div>
+      <div style="display:flex; justify-content:center; gap:10px; margin-bottom:16px;">
+        <button class="btn btn-secondary btn-sm" id="btn-autofill-otp">⚡ Autofill OTP</button>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-secondary" style="flex:1;" id="btn-close-otp">Cancel</button>
+        <button class="btn btn-success" style="flex:1;" id="btn-verify-otp">Verify & Confirm ➔</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Achievement Unlock Banner Modal -->
+  <div class="modal-overlay" id="achievement-modal">
+    <div class="modal-dialog" style="border: 2px solid #f59e0b; background: #fffbeb;">
+      <div class="achieve-icon" style="font-size:3rem; margin-bottom:8px;">🏆</div>
+      <h3 class="achieve-title" style="color:#b45309;">Achievement Unlocked!</h3>
+      <p class="achieve-desc" style="color:#78350f; margin:10px 0;"></p>
+      <div style="color:#059669; font-weight:700; margin-bottom:14px;">+250 XP • +₹300 RailCoins Added!</div>
+      <button class="btn btn-primary" onclick="document.getElementById('achievement-modal').classList.remove('active')">Awesome!</button>
+    </div>
+  </div>
+
+  <!-- Floating Toast Notification Container -->
+  <div class="game-toast-container" id="game-toast-container"></div>
+
+  <!-- Footer -->
+  <footer class="irctc-footer">
+    <div class="footer-inner">
+      <div>
+        <h4 style="color:white; margin-bottom:8px;">RailYatra Simulator</h4>
+        <p style="max-width:320px;">Dedicated to Indian Railway enthusiasts and travelers. Experience the thrill of booking tickets across India's expansive railway network.</p>
+      </div>
+      <div>
+        <h4 style="color:white; margin-bottom:8px;">Quick Shortcuts</h4>
+        <p><a href="#" onclick="navigateTo('home-view')" style="color:#94a3b8; text-decoration:none;">Book Ticket</a></p>
+        <p><a href="#" onclick="navigateTo('pnr-view')" style="color:#94a3b8; text-decoration:none;">PNR Status Enquiry</a></p>
+        <p><a href="#" onclick="navigateTo('game-view')" style="color:#94a3b8; text-decoration:none;">Tatkal Rush Challenge</a></p>
+      </div>
+      <div>
+        <h4 style="color:white; margin-bottom:8px;">Simulated Indian Railways</h4>
+        <p>15 Supported Major Junctions</p>
+        <p>Dynamic Berth Matrix & Coach Layout</p>
+        <p>Authentic IRCTC Electronic Reservation Slip</p>
+      </div>
+    </div>
+    <div class="footer-copy">
+      © 2026 RailYatra – Indian Railway Ticket Booking Simulator. Built with HTML5, CSS3, & Vanilla JavaScript. Inspired by IRCTC.
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="trainData.js"></script>
+  <script src="sounds.js"></script>
+  <script src="gameEngine.js"></script>
+  <script src="app.js"></script>
+
+  <script>
+    // Tab switcher for Payment modal
+    function switchPayTab(tabId, btn) {
+      document.querySelectorAll('.pay-tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.pay-tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      const target = document.getElementById(tabId);
+      if (target) target.classList.add('active');
+      if (window.RailwaySound) window.RailwaySound.playClick();
+    }
+  </script>
+</body>
+</html>
